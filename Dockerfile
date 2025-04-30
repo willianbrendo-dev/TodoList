@@ -8,11 +8,15 @@ WORKDIR /app
 COPY requirements.txt .
 
 # Instala dependências do sistema necessárias para Pillow e outros
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    build-essential \
     libjpeg-dev \
     zlib1g-dev \
     libpng-dev \
+    libtiff-dev \
     libfreetype6-dev \
+    webp \
+    libwebp-dev \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
