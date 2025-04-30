@@ -69,9 +69,6 @@ WSGI_APPLICATION = 'core.wsgi.application'
 # https://docs.djangoproject.com/en/4.1/ref/settings/#databases
 
 # Detecta se está rodando no Docker por uma variável ou padrão
-USE_DOCKER = os.getenv('USE_DOCKER', 'false').lower() == 'true'
-
-DB_HOST = 'db' if USE_DOCKER else 'localhost'
 
 DATABASES = {
     'default': {
@@ -79,7 +76,7 @@ DATABASES = {
         'NAME': os.getenv('DB_NAME'),
         'USER': os.getenv('DB_USER'),
         'PASSWORD': os.getenv('DB_PASSWORD'),
-        'HOST': DB_HOST,
+        'HOST': os.getenv('DB_HOST', 'localhost'),
         'PORT': os.getenv('DB_PORT', '5432'),
     }
 }
