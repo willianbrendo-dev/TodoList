@@ -1,0 +1,268 @@
+{% extends 'base.html' %}
+
+{% block title %}Django Projeto 2: TO DO LIST{% endblock %} 
+{% block styles %}
+    <style>
+        .check-status {
+            text-decoration: line-through;
+            color: #cbcbcb;
+        }
+    </style>
+{% endblock styles %} 
+{% block content %}
+    <div class="p-5"> 
+	    <h2>TodoList</h2>  
+
+		<form class="col-12 col-md-8 col-lg-6 mb-4" method="POST"> 
+            {% csrf_token %}
+            <div class="input-group shadow-sm">
+                <span class="input-group-text bg-light">
+                    <i class="fa fa-tasks"></i>
+                </span>
+                {{ form.title }}
+                <button type="submit" class="btn btn-success">
+                    <i class="fa fa-plus"></i>
+                </button>
+            </div>
+        </form> 
+
+		<table class="table"> 
+
+            <thead>
+                <tr>
+                    <th scope="col">Titulo</th> 
+                    <th scope="col">Status</th>
+                    <th scope="col">Deletar</th> 
+                </tr>
+            </thead>
+
+            {% for el in todo %} 
+            <tbody>
+                <tr class="table align-middle" id="{{el.id}}"> 
+
+                    <th scope="row"> 
+
+                        <div class="title {% if el.status.id == 3 %}check-status{% endif %}" id="title{{el.id}}" data-title="{{el.id}}">{{el.title}}</div> 
+                        
+                        <form class="d-none d-flex" id="form-title{{el.id}}" method="GET" style="width:35rem;">
+                            <input class="form-control" type="text" id="inputText{{el.id}}" value="{{el.title}}">
+                            <button type="submit" class="btn" id="edit{{el.id}}"><i class="fa fa-edit link-warning"></i></button>
+                        </form> 
+                    </th>  
+  
+                    <th scope="row">  
+                    
+                        <div class="SelDiv">
+                            <select class="form-select" name="status" id="{{el.id}}">
+                                {% for st in status_list %}
+                                <option value="{{st.id}}"{% if el.status.id == st.id %}selected{% endif %}>{{st.name}}</option>
+                                {% endfor %}
+                            </select>
+                        </div> 
+                     
+                    </th> 
+
+                    <th scope="row">
+                        <a class="btn" id="btn-delete" data-delete="{{el.id}}"><i class="fa fa-trash link-danger"></i></a>
+				 	</th> 
+
+                </tr>
+            </tbody>  
+            {% endfor %}
+
+        </table>
+        <!-- LISTA DE TASKS EM FORMATO DE CARD PARA MOBILE -->
+        <div class="d-block d-md-none" id="mobile-cards">
+            {% for el in todo %}
+            <div class="card mb-3" id="card-{{el.id}}">
+                <div class="card-body">
+                    <h5 class="card-title {% if el.status.id == 3 %}check-status{% endif %}" id="card-title-{{el.id}}">
+                        {{el.title}}
+                    </h5>
+
+                    <div class="mb-3">
+                        <select class="form-select" name="status" id="card-status-{{el.id}}">
+                            {% for st in status_list %}
+                            <option value="{{st.id}}"{% if el.status.id == st.id %}selected{% endif %}>
+                                {{st.name}}
+                            </option>
+                            {% endfor %}
+                        </select>
+                    </div>
+
+                    <div class="d-flex justify-content-between">
+                        <button class="btn btn-warning btn-sm" id="card-edit-{{el.id}}">
+                            <i class="fa fa-edit"></i> Editar
+                        </button>
+                        <button class="btn btn-danger btn-sm" id="card-delete-{{el.id}}">
+                            <i class="fa fa-trash"></i> Deletar
+                        </button>
+                    </div>
+                </div>
+            </div>
+            {% endfor %}
+        </div>
+    
+
+	</div> 
+{% endblock %}
+
+
+{% block scripts %}
+<script type="text/javascript"> 
+
+    $("div.title").click(function () { 
+        var data_id = $(this).attr("data-title");   
+        $("form#form-title" + data_id).removeClass('d-none')
+        $("div#title" + data_id).addClass('d-none')
+
+        $('button#edit' + data_id).on("click", function (e) {
+            e.preventDefault();
+
+            title = $('input#inputText'+ data_id).val(); 
+
+            $.ajax({
+                type: 'GET',
+                url: '{% url "update-item" %}',
+                data: {'data_id': data_id,'title': title,},
+                datatype: "json",
+                success: function (data) { 
+                    if (data.status == "update-item") {
+                        $("form#form-title" + data_id).addClass('d-none');
+                        $("div#title" + data_id).removeClass('d-none'); 
+                        $("#title" + data_id).html(data.title); 
+                    }   
+                }
+            }); 
+
+        }); 
+    })
+ 
+	// Muda Status do Item da Lista
+	$("div.SelDiv select").on('change', function () {
+
+    var data_id = this.id;
+    var status_id = $(this).find('option').filter(':selected').val();
+
+    console.log("data_id: ", data_id, "status_id: ", status_id)
+
+        $.ajax({
+            type: 'GET',
+            url: '{% url "update-status" %}',
+            data: {
+                'data_id': data_id,
+                'status_id': status_id,
+            },
+            datatype: "json",
+
+            success: function (data) {
+                console.log(data)
+                // Status = Finalizado (id=3)
+                if (data.status == '3'){
+                    $("div#title" + data_id).addClass('check-status');  
+                }else{
+                    $("div#title" + data_id).removeClass('check-status');
+                }
+                
+            }
+
+        });
+    });
+
+    	// Deleta um Item da Lista
+	$("a#btn-delete").on("click", function (e) {
+		e.preventDefault();
+
+		var todo_id = $(this).attr("data-delete");
+		console.log(todo_id);
+
+        $.ajax({
+			type: 'GET',
+			url: '{% url "delete" %}',
+			data: { 'todo_id': todo_id },
+			datatype: "json",
+			success: function (data) {
+                console.log(data)
+                if (data.status == "delete") {
+					$("tbody tr#" + todo_id).fadeOut("slow", function () {
+						$("tbody tr#" + todo_id).remove();
+					});
+				} else {
+					// faz alguma coisa
+				}
+
+			}
+		});
+		 
+	})
+
+    $(document).ready(function(){
+
+        // Editar título no card
+        $("button[id^='card-edit-']").on("click", function(e) {
+            e.preventDefault();
+            var card_id = $(this).attr('id').replace('card-edit-', '');
+            var new_title = prompt("Editar tarefa:", $("#card-title-" + card_id).text());
+    
+            if (new_title != null && new_title.trim() != "") {
+                $.ajax({
+                    type: 'GET',
+                    url: '{% url "update-item" %}',
+                    data: { 'data_id': card_id, 'title': new_title },
+                    datatype: "json",
+                    success: function (data) {
+                        if (data.status == "update-item") {
+                            $("#card-title-" + card_id).text(data.title);
+                        }
+                    }
+                });
+            }
+        });
+    
+        // Deletar tarefa no card
+        $("button[id^='card-delete-']").on("click", function(e) {
+            e.preventDefault();
+            var card_id = $(this).attr('id').replace('card-delete-', '');
+            $.ajax({
+                type: 'GET',
+                url: '{% url "delete" %}',
+                data: { 'todo_id': card_id },
+                datatype: "json",
+                success: function (data) {
+                    if (data.status == "delete") {
+                        $("#card-" + card_id).fadeOut("slow", function(){
+                            $(this).remove();
+                        });
+                    }
+                }
+            });
+        });
+    
+        // Mudar status no card
+        $("select[id^='card-status-']").on('change', function () {
+            var card_id = $(this).attr('id').replace('card-status-', '');
+            var status_id = $(this).val();
+    
+            $.ajax({
+                type: 'GET',
+                url: '{% url "update-status" %}',
+                data: { 'data_id': card_id, 'status_id': status_id },
+                datatype: "json",
+                success: function (data) {
+                    if (data.status == '3') {
+                        $("#card-title-" + card_id).addClass('check-status');
+                    } else {
+                        $("#card-title-" + card_id).removeClass('check-status');
+                    }
+                }
+            });
+        });
+    
+    });
+    
+
+
+</script>
+
+
+{% endblock scripts %} 

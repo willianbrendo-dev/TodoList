@@ -1,0 +1,30 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+
+# Virtual environment
+venv/
+env/
+.venv/
+
+# Env and config
+.env
+.env.*
+
+# Git
+.git
+.gitignore
+
+# Editor folders
+.vscode/
+.idea/
+
+# OS files
+.DS_Store
+
+# Build
+*.log
+*.sqlite3
+*.db
+media/
+static/
