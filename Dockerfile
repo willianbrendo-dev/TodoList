@@ -17,6 +17,7 @@ RUN apt-get update && apt-get install -y --no-install-recommends \
     libfreetype6-dev \
     webp \
     libwebp-dev \
+    netcat-traditional \
     && rm -rf /var/lib/apt/lists/*
 
 RUN pip install --upgrade pip
