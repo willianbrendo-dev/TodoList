@@ -1,26 +1,26 @@
 FROM python:3.12-slim
 
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
 WORKDIR /app
 
-COPY . .
+COPY requirements.txt .
 
-# Instala lib necessária para PostgreSQL
+# Instala dependências do sistema necessárias para Pillow e outros
 RUN apt-get update && apt-get install -y \
-    libpq-dev \
+    libjpeg-dev \
+    zlib1g-dev \
+    libpng-dev \
+    libfreetype6-dev \
     && rm -rf /var/lib/apt/lists/*
-
-RUN apt-get update && apt-get install -y netcat-openbsd
-
-
-
 
 RUN pip install --upgrade pip
 RUN pip install -r requirements.txt
 
+COPY . .
+
 COPY entrypoint.sh /entrypoint.sh
 RUN chmod +x /entrypoint.sh
 
-
-EXPOSE 8000
-
-CMD ["python3", "manage.py", "runserver", "0.0.0.0:8000"]
+ENTRYPOINT ["/entrypoint.sh"]
