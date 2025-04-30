@@ -18,4 +18,4 @@ python3 manage.py collectstatic --noinput # --noinput para não pedir confirmaç
 echo "Migrações aplicadas e estáticos coletados. Iniciando o servidor Gunicorn..."
 
 # Substitua 'your_project_name' pelo nome real da pasta do seu projeto Django
-gunicorn your_project_name.wsgi:application --bind 0.0.0.0:8000
+gunicorn core.wsgi:application --bind 0.0.0.0:8000
