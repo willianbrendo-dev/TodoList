@@ -27,4 +27,4 @@ env/
 *.sqlite3
 *.db
 media/
-static/
+
