@@ -1,0 +1,26 @@
+.check-status {
+    text-decoration: line-through;
+    color: #cbcbcb;
+}
+/* Esconde os cards no desktop */
+#mobile-cards {
+    display: none;
+}
+@media (max-width: 768px) {
+    table.table {
+        display: none; /* Esconde a tabela */
+    }
+    #mobile-cards {
+        display: block; /* Mostra os cards */
+    }
+}
+
+.btn {
+    margin-left: 5px;
+}
+
+.col-md-4 {
+    margin: auto;
+    margin-top: 20px;
+}
+
